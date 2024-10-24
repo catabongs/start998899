@@ -48,6 +48,7 @@ install_packages() {
     if [[ ! -f "$PKGS_FILE" ]]; then
         print_error "Package list file not found: $PKGS_FILE"
         exit 1
+    fi  # Added missing 'fi'
     
     # Get packages, excluding comments and empty lines
     packages=$(grep -v '^#' "$PKGS_FILE" | grep -v '^[[:space:]]*$')
@@ -83,7 +84,7 @@ install_packages() {
             done <<< "$packages"
             ;;
     esac
-} 
+}
 
 # Install dotfiles
 install_dotfiles() {
@@ -92,7 +93,7 @@ install_dotfiles() {
     if [[ ! -d "$DOT_FILES_DIR" ]]; then
         print_error "Dotfiles directory not found: $DOT_FILES_DIR"
         exit 1
-    }
+    fi  # Fixed closing brace to 'fi'
     
     # Create backups of existing dotfiles
     local backup_dir="${HOME}/.dotfiles_backup_$(date +%Y%m%d_%H%M%S)"
