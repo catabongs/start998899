@@ -83,7 +83,7 @@ install_packages() {
             done <<< "$packages"
             ;;
     esac
-    } 
+} 
 
 # Install dotfiles
 install_dotfiles() {
