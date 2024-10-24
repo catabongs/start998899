@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# Color definitions
+declare -A colors=(
+    ["Bold"]="\[\e[1m\]"
+    ["Reset_Bold"]="\[\e[0m\]"
+    ["Cyan"]="\[\033[0;36m\]"
+    ["Green"]="\[\033[1;32m\]"
+    ["Yellow"]="\[\033[0;33m\]"
+    ["Magenta"]="\[\033[1;35m\]"
+    ["Red"]="\[\033[0;31m\]"
+    ["White"]="\[\033[1;97m\]"
+    ["Orange"]="\[\033[38;5;208m\]"
+    ["Reset"]="\[\033[0m\]"
+)
+
+# Service status checking functions
+check_tor_status() {
+    systemctl is-active --quiet tor.service
+}
+
+# Path manipulation function
+get_shortened_path() {
+    local full_path=${PWD/#$HOME/\~}
+    local dir_count=$(tr -cd '/' <<< "$full_path" | wc -c)
+
+    if ((dir_count > 3)); then
+        local first_dir=$(cut -d'/' -f1 <<< "$full_path")
+        local last_three=$(rev <<< "$full_path" | cut -d'/' -f1-3 | rev)
+        echo "$first_dir/../$last_three"
+    else
+        echo "$full_path"
+    fi
+}
+
+# Status indicator functions
+get_tor_indicator() {
+    check_tor_status && echo "${colors[Magenta]}[onion]${colors[Reset]}${colors[Red]}-" || echo ""
+}
+
+
+get_venv_info() {
+    if [[ -n "$VIRTUAL_ENV" ]]; then
+        local venv_name=$(basename "$VIRTUAL_ENV")
+        echo "${colors[Orange]}${colors[Bold]}($venv_name)${colors[Red]}-"
+    else
+        echo ""
+    fi
+}
+
+# Main prompt update function
+update_prompt() {
+    local path=$(get_shortened_path)
+    local venv_info=$(get_venv_info)
+    local tor_status=$(get_tor_indicator)
+    
+    # Build the prompt
+    PS1="${colors[Red]}┌─"
+    PS1+="${venv_info}${tor_status}"
+    PS1+="[${colors[Bold]}${colors[Green]}\u${colors[Yellow]}@"
+    PS1+="${colors[Cyan]}${colors[Bold]}\h${colors[Reset_Bold]}${colors[Red]}]-"
+    PS1+="[${colors[Magenta]}${path}${colors[Red]}]\n"
+    PS1+="└──╼${colors[Cyan]}${colors[Bold]}\$${colors[Reset]} "
+}
+
+# Set the prompt command
+PROMPT_COMMAND=update_prompt

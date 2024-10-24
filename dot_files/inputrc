@@ -1,0 +1,2 @@
+# Make Ctrl + Backspace delete the previous word
+"\C-h": backward-kill-word

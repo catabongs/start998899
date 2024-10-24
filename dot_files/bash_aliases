@@ -1,0 +1,17 @@
+# General
+alias ls='ls --color=auto'
+alias ll='ls -la --color=auto'
+alias la='ls -a --color=auto'
+alias l='ls -l --color=auto'
+alias grep='grep --color=auto'
+alias cls='clear'
+alias sourali='source ~/.bash_aliases'
+
+# Text copy/paste
+alias xselc='xclip -selection clipboard'
+alias xselp='xclip -selection clipboard -o | xclip -selection clipboard -i && echo "Current clipboard:" && xclip -selection clipboard -o && echo -e "\nCleaning clipboard in 5s..." && sleep 5 && echo "" | xclip -selection clipboard -i && echo "[+] Clipboard cleared..."'
+
+# Inet things
+alias myip='curl ipinfo.io'
+alias p1='ping -c 1 1.1.1.1'
+alias hg='host google.com'
