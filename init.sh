@@ -40,36 +40,48 @@ detect_pkg_manager() {
     fi
 }
 
-# Install packages based on detected package manager
 install_packages() {
     local pkg_manager="$1"
     local packages
     
-    # Read packages from pkgs file
+    # Read packages from pkgs file, ignoring comments and empty lines
     if [[ ! -f "$PKGS_FILE" ]]; then
         print_error "Package list file not found: $PKGS_FILE"
         exit 1
     }
     
-    packages=$(cat "$PKGS_FILE")
+    # Get packages, excluding comments and empty lines
+    packages=$(grep -v '^#' "$PKGS_FILE" | grep -v '^[[:space:]]*$')
     print_msg "Installing packages using $pkg_manager..."
     
     case "$pkg_manager" in
         apt)
             sudo apt update
-            sudo apt install -y $packages
+            while read -r pkg; do
+                print_msg "Installing $pkg..."
+                sudo apt install -y "$pkg"
+            done <<< "$packages"
             ;;
         dnf)
             sudo dnf update -y
-            sudo dnf install -y $packages
+            while read -r pkg; do
+                print_msg "Installing $pkg..."
+                sudo dnf install -y "$pkg"
+            done <<< "$packages"
             ;;
         pacman)
             sudo pacman -Syu --noconfirm
-            sudo pacman -S --noconfirm $packages
+            while read -r pkg; do
+                print_msg "Installing $pkg..."
+                sudo pacman -S --noconfirm "$pkg"
+            done <<< "$packages"
             ;;
         zypper)
             sudo zypper refresh
-            sudo zypper install -y $packages
+            while read -r pkg; do
+                print_msg "Installing $pkg..."
+                sudo zypper install -y "$pkg"
+            done <<< "$packages"
             ;;
     esac
 }
