@@ -48,40 +48,35 @@ install_packages() {
     if [[ ! -f "$PKGS_FILE" ]]; then
         print_error "Package list file not found: $PKGS_FILE"
         exit 1
-    fi  # Added missing 'fi'
+    fi
     
-    # Get packages, excluding comments and empty lines
-    packages=$(grep -v '^#' "$PKGS_FILE" | grep -v '^[[:space:]]*$')
+    # Get all packages at once, excluding comments and empty lines
+    packages=$(grep -v '^#' "$PKGS_FILE" | grep -v '^[[:space:]]*$' | tr '\n' ' ')
+    
+    if [[ -z "$packages" ]]; then
+        print_error "No packages found to install in $PKGS_FILE"
+        exit 1
+    fi
+    
     print_msg "Installing packages using $pkg_manager..."
+    print_msg "Packages to install: $packages"
     
     case "$pkg_manager" in
         apt)
             sudo apt update
-            while read -r pkg; do
-                print_msg "Installing $pkg..."
-                sudo apt install -y "$pkg"
-            done <<< "$packages"
+            sudo apt install -y $packages
             ;;
         dnf)
             sudo dnf update -y
-            while read -r pkg; do
-                print_msg "Installing $pkg..."
-                sudo dnf install -y "$pkg"
-            done <<< "$packages"
+            sudo dnf install -y $packages
             ;;
         pacman)
             sudo pacman -Syu --noconfirm
-            while read -r pkg; do
-                print_msg "Installing $pkg..."
-                sudo pacman -S --noconfirm "$pkg"
-            done <<< "$packages"
+            sudo pacman -S --noconfirm $packages
             ;;
         zypper)
             sudo zypper refresh
-            while read -r pkg; do
-                print_msg "Installing $pkg..."
-                sudo zypper install -y "$pkg"
-            done <<< "$packages"
+            sudo zypper install -y $packages
             ;;
     esac
 }
@@ -93,7 +88,7 @@ install_dotfiles() {
     if [[ ! -d "$DOT_FILES_DIR" ]]; then
         print_error "Dotfiles directory not found: $DOT_FILES_DIR"
         exit 1
-    fi  # Fixed closing brace to 'fi'
+    fi
     
     # Create backups of existing dotfiles
     local backup_dir="${HOME}/.dotfiles_backup_$(date +%Y%m%d_%H%M%S)"
